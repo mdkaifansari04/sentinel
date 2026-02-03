@@ -1,6 +1,8 @@
 import "dotenv/config";
+import type { Prisma } from "@prisma/client";
 import type { GitHubEventData } from "./types/type";
 import { prisma } from "./libs/client";
+import { repoList } from "./libs/repo";
 
 type RepoRef = {
   owner: string;
@@ -21,7 +23,6 @@ type RawGitHubEvent = {
 const POLL_INTERVAL_MS = parseNumberEnv("POLL_INTERVAL_MS", 5 * 60 * 1000);
 const REQUEST_DELAY_MS = parseNumberEnv("REQUEST_DELAY_MS", 200);
 
-const repoList = parseRepoList(process.env.REPO_LIST);
 const githubToken = process.env.GITHUB_TOKEN;
 let isRunning = false;
 
@@ -349,6 +350,11 @@ function unknownEvent(type: string): GitHubEventData {
   };
 }
 
+function toInputJsonValue(data: GitHubEventData): Prisma.InputJsonValue {
+  // Force JSON-serializable shape for Prisma JSON input typing.
+  return JSON.parse(JSON.stringify(data)) as Prisma.InputJsonValue;
+}
+
 async function storeEvents(repo: RepoRef, events: RawGitHubEvent[]): Promise<number> {
   if (events.length === 0) {
     return 0;
@@ -377,8 +383,7 @@ async function storeEvents(repo: RepoRef, events: RawGitHubEvent[]): Promise<num
       avatar: event.actor?.avatar_url ?? "",
       type: event.type,
       createdAt: new Date(event.created_at),
-      updatedAt: undefined,
-      data: mapEventData(event),
+      data: toInputJsonValue(mapEventData(event)),
       isSensitive: false,
     }));
 
