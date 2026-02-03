@@ -1,13 +1,14 @@
 import express from "express";
 import { globalError } from "./libs/globalError";
 import eventRoute from "./router/event.route";
+import cors from "cors"
 import "./worker";
 
 const app = express();
 
 app.use(express.json())
-app.use("/event", eventRoute)
-
+app.use(cors())
+app.use("/api/events", eventRoute)
 
 
 app.use(globalError)
