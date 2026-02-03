@@ -1,44 +1,22 @@
 {
-  // Visit https://aka.ms/tsconfig to read more about this file
+  "$schema": "https://json.schemastore.org/tsconfig",
   "compilerOptions": {
-    // File Layout
-    "rootDir": "./src",
-    "outDir": "./dist",
-
-    // Environment Settings
-    // See also https://aka.ms/tsconfig/module
-    "module": "nodenext",
-    "target": "esnext",
-    // For nodejs:
-    "lib": ["esnext"],
-    "types": ["node"],
-    // and npm install -D @types/node
-
-    // Other Outputs
-    "sourceMap": true,
     "declaration": true,
+    "outDir": "./dist",
+    "rootDir": "./src",
     "declarationMap": true,
-
-    // Stricter Typechecking Options
-    "noUncheckedIndexedAccess": true,
-    "exactOptionalPropertyTypes": true,
-
-    // Style Options
-    // "noImplicitReturns": true,
-    // "noImplicitOverride": true,
-    // "noUnusedLocals": true,
-    // "noUnusedParameters": true,
-    // "noFallthroughCasesInSwitch": true,
-    // "noPropertyAccessFromIndexSignature": true,
-
-    // Recommended Options
-    "strict": true,
-    "verbatimModuleSyntax": true,
+    "esModuleInterop": true,
+    "incremental": false,
     "isolatedModules": true,
-    "noUncheckedSideEffectImports": true,
+    "lib": ["es2022", "DOM", "DOM.Iterable"],
+    "module": "ESNext",
     "moduleDetection": "force",
-    "skipLibCheck": true
+    "moduleResolution": "Bundler",
+    "noUncheckedIndexedAccess": true,
+    "resolveJsonModule": true,
+    "skipLibCheck": true,
+    "strict": true,
+    "target": "ES2022"
   },
-  "include": ["src/**/*"],
-  "exclude": ["/dist"]
+  "include": ["./src/**/*"]
 }

@@ -20,5 +20,8 @@
     "dotenv": "^17.2.3",
     "prisma": "^7.3.0",
     "typescript": "^5.9.3"
+  },
+  "devDependencies": {
+    "tsc-watch": "^7.2.0"
   }
 }
