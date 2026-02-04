@@ -3,6 +3,7 @@ import type { Prisma } from "@prisma/client";
 import type { GitHubEventData } from "../types/type";
 import { prisma } from "../libs/client";
 import { repoList } from "../libs/repo";
+import { parentPort } from "worker_threads"
 
 type RepoRef = {
   owner: string;
