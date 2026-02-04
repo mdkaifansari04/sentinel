@@ -20,7 +20,7 @@ const spaceGrotesk = Space_Grotesk({
 });
 
 export const metadata: Metadata = {
-  title: "RepoPulse",
+  title: "Sentinel",
   description: "Track the heartbeat of open-source repos in minutes.",
 };
 

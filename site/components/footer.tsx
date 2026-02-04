@@ -4,7 +4,7 @@ function Footer() {
     <footer className="border-t border-border/60 bg-background/90">
       <div className="mx-auto flex w-full max-w-6xl flex-col gap-4 px-6 py-8 text-sm text-muted-foreground md:flex-row md:items-center md:justify-between">
         <div>
-          <p className="font-semibold text-foreground">RepoPulse</p>
+          <p className="font-semibold text-foreground">Sentinel</p>
           <p>Built for open-source contributors who value context over noise.</p>
         </div>
         <div className="flex flex-wrap items-center gap-4">

@@ -5,6 +5,7 @@ import { Menu, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import React from "react";
 import { cn } from "@/lib/utils";
+import Image from "next/image";
 
 const menuItems = [
   { name: "How it works", href: "#how-it-works" },
@@ -15,9 +16,9 @@ const menuItems = [
 function Logo() {
   return (
     <div className="flex items-center gap-3">
-      <div className="flex h-9 w-9 items-center justify-center rounded-lg border border-border/70 bg-muted text-xs font-semibold tracking-[0.2em]">RP</div>
+      <Image src="/logo.svg" alt="Sentinel Logo" width={32} height={32} />
       <div>
-        <p className="text-sm font-semibold text-foreground">RepoPulse</p>
+        <h1 className="text-lg font-semibold leading-tight">Sentinel</h1>
         <p className="text-xs text-muted-foreground">Open-source activity radar</p>
       </div>
     </div>

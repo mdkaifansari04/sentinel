@@ -79,7 +79,7 @@ export default function HeroSection() {
                   Track every open-source repo that matters
                 </TextEffect>
                 <TextEffect per="line" preset="fade-in-blur" speedSegment={0.3} delay={0.5} as="p" className="mx-auto mt-8 max-w-2xl text-balance text-lg">
-                  RepoPulse tracks issues, PRs, reviews, and releases so contributors never miss what matters.
+                  Sentinel tracks issues, PRs, reviews, and releases so contributors never miss what matters.
                 </TextEffect>
 
                 <AnimatedGroup

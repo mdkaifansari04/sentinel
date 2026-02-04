@@ -17,7 +17,6 @@ export default function Home() {
         <AboutSection />
         <SolutionSection />
       </main>
-
       <Footer />
     </div>
   );

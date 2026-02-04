@@ -15,13 +15,13 @@ export default function AboutSection() {
 
           <div className="relative space-y-4">
             <p className="text-muted-foreground">
-              Open-source work moves fast. Important discussions get buried. <span className="text-accent-foreground font-bold">RepoPulse surfaces what matters so contributors can stay aligned.</span>
+              Open-source work moves fast. Important discussions get buried. <span className="text-accent-foreground font-bold">Sentinel surfaces what matters so contributors can stay aligned.</span>
             </p>
             <p className="text-muted-foreground">It supports the full contributor loop — issues, PRs, reviews, and releases — without losing the context that makes decisions easier.</p>
 
             <div className="pt-6">
               <blockquote className="border-l-4 pl-4">
-                <p>Whether you are reviewing pull requests, tracking issues, or trying to understand where a project is heading, RepoPulse keeps a clear record of recent activity. It removes the friction of checking multiple repos and helps contributors make smarter decisions with the latest context, without being online 24/7.</p>
+                <p>Whether you are reviewing pull requests, tracking issues, or trying to understand where a project is heading, Sentinel keeps a clear record of recent activity. It removes the friction of checking multiple repos and helps contributors make smarter decisions with the latest context, without being online 24/7.</p>
                 <div className="mt-6 space-y-3">
                   <cite className="block font-medium">Open-source contributor</cite>
                   <img className="h-5 w-fit dark:invert" src="https://html.tailus.io/blocks/customers/nvidia.svg" alt="Community Logo" height="20" width="auto" />

@@ -8,7 +8,7 @@ export default function Features() {
       <div className="@container mx-auto max-w-5xl px-6">
         <div className="text-center">
           <h2 className="text-balance text-4xl font-semibold lg:text-5xl">How it works</h2>
-          <p className="mt-4">RepoPulse monitors the repos you follow, normalizes activity, and keeps the pulse ready for review.</p>
+          <p className="mt-4">Sentinel monitors the repos you follow, normalizes activity, and keeps the pulse ready for review.</p>
         </div>
         <div className="@min-4xl:max-w-full @min-4xl:grid-cols-3 mx-auto mt-8 grid max-w-sm gap-6 [--color-background:var(--color-muted)] [--color-card:var(--color-muted)] *:text-center md:mt-16 dark:[--color-muted:var(--color-zinc-900)]">
           <Card className="group border-0 shadow-none bg-black">
@@ -21,7 +21,7 @@ export default function Features() {
             </CardHeader>
 
             <CardContent>
-              <p className="text-sm">Choose the open-source projects you care about and let RepoPulse keep a steady watch.</p>
+              <p className="text-sm">Choose the open-source projects you care about and let Sentinel keep a steady watch.</p>
             </CardContent>
           </Card>
 
