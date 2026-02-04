@@ -76,7 +76,7 @@ export default function HeroSection() {
             <div className="mx-auto max-w-7xl px-6">
               <div className="text-center sm:mx-auto lg:mr-auto lg:mt-0">
                 <TextEffect preset="fade-in-blur" speedSegment={0.3} as="h1" className="mx-auto mt-8 max-w-4xl text-balance text-5xl max-md:font-semibold md:text-7xl lg:mt-16 xl:text-[5.25rem]">
-                  Stay current on every open-source repo you care about
+                  Track every open-source repo that matters
                 </TextEffect>
                 <TextEffect per="line" preset="fade-in-blur" speedSegment={0.3} delay={0.5} as="p" className="mx-auto mt-8 max-w-2xl text-balance text-lg">
                   RepoPulse tracks issues, PRs, reviews, and releases so contributors never miss what matters.
