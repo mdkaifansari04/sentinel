@@ -1,24 +1,13 @@
 {
   "compilerOptions": {
-    "noEmit": true,
-    "strict": true,
     "target": "ESNext",
-    "lib": ["ES2024", "DOM", "DOM.Iterable"],
-    "allowJs": true,
-    "jsx": "preserve",
+    "module": "NodeNext",
+    "moduleResolution": "NodeNext",
+    "strict": true,
     "esModuleInterop": true,
-    "module": "ESNext",
-    "moduleResolution": "bundler",
-    "forceConsistentCasingInFileNames": true,
-    "useUnknownInCatchVariables": true,
-    "noImplicitOverride": true,
-    "verbatimModuleSyntax": true,
-    "outDir": "./dist",
-    "paths": {
-      "test/*": ["test/*"],
-      "~/*": ["src/*"]
-    },
-    "baseUrl": "."
+    "sourceMap": true,
+    "lib": ["ESNext"],
+    "outDir": "./dist"
   },
-  "include": ["src", "test"]
+  "include": ["src/**/*"]
 }

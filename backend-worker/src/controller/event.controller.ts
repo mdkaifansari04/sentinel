@@ -1,6 +1,6 @@
 import type { NextFunction, Request, Response } from "express";
-import { ErrorResponse } from "../libs/globalError";
-import { prisma } from "../libs/client";
+import { ErrorResponse } from "../libs/globalError.js";
+import { prisma } from "../libs/client.js";
 
 export const getEvents = async (req: Request, res: Response, next: NextFunction) => {
   try {
