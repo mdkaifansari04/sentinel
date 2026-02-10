@@ -102,10 +102,8 @@ function AnimatedGroup({ children, className, variants, preset, as = "div", asCh
   const MotionChild = React.useMemo(() => motion.create(asChild), [asChild]);
 
   return (
-    // @ts-expect-error - Component creation in render is flagged but necessary for dynamic motion component
     <MotionComponent initial="hidden" animate="visible" variants={containerVariants} className={className}>
       {React.Children.map(children, (child, index) => (
-        // @ts-expect-error - Component creation in render is flagged but necessary for dynamic motion component
         <MotionChild key={index} variants={itemVariants}>
           {child}
         </MotionChild>
