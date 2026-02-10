@@ -11,7 +11,12 @@ import { initWorkerThread } from "./worker/init.js";
 const app = express();
 
 app.use(express.json());
-app.use(cors());
+app.use(
+  cors({
+    origin: ["http://localhost:3000", "https://sentinel.k04.tech"],
+    methods: ["GET", "POST", "PUT", "DELETE"],
+  }),
+);
 app.get("/", (req, res) => res.status(200).json({ message: "Welcome to the Sentinel API" }));
 app.use("/api/events", eventRoute);
 
