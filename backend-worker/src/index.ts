@@ -12,6 +12,7 @@ const app = express();
 
 app.use(express.json());
 app.use(cors());
+app.get("/", (req, res) => res.status(200).json({ message: "Welcome to the Sentinel API" }));
 app.use("/api/events", eventRoute);
 
 app.use(globalError);
