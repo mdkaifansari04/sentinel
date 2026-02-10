@@ -1,11 +1,9 @@
-import Link from "next/link";
-
 import AboutSection from "@/components/container/about";
 import Features from "@/components/container/feature";
 import HeroSection from "@/components/container/hero";
 import SolutionSection from "@/components/container/solution";
-import { SiteHeader } from "@/components/site-header";
 import Footer from "@/components/footer";
+import { SiteHeader } from "@/components/site-header";
 
 export default function Home() {
   return (

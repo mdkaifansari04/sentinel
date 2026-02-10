@@ -3,7 +3,7 @@ import { ActivityClient } from "@/components/activity-client";
 import { fetchEvents } from "@/lib/api";
 
 export default async function ActivityPage() {
-  // const events = await fetchEvents();
+  const events = await fetchEvents();
 
   return (
     <div className="min-h-screen">
@@ -14,8 +14,7 @@ export default async function ActivityPage() {
           <h1 className="text-3xl font-semibold">Latest repository events</h1>
           <p className="text-muted-foreground">Built for contributors and maintainers who need signal-fast awareness.</p>
         </header>
-
-        {/* <ActivityClient events={events} /> */}
+        <ActivityClient events={events} />
       </main>
     </div>
   );
