@@ -1,9 +1,12 @@
+import { config } from "dotenv";
+config();
+
 import express from "express";
 import { Worker } from "worker_threads";
-import { globalError } from "./libs/globalError";
-import eventRoute from "./router/event.route";
+import { globalError } from "./libs/globalError.js";
+import eventRoute from "./router/event.route.js";
 import cors from "cors";
-import { initWorkerThread } from "./worker/init";
+import { initWorkerThread } from "./worker/init.js";
 
 const app = express();
 
@@ -12,7 +15,7 @@ app.use(cors());
 app.use("/api/events", eventRoute);
 
 app.use(globalError);
-initWorkerThread()
+initWorkerThread();
 
 app.listen(8080, () => {
   console.log("Server started on port 8080");

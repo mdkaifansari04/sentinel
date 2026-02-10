@@ -17,12 +17,7 @@ const dateFormatter = new Intl.DateTimeFormat("en-US", {
   timeStyle: "short",
 });
 
-const quickPrompts = [
-  "What are the most trending issues?",
-  "Which PRs are ready to merge?",
-  "Show me urgent review requests.",
-  "Summarize activity in the last 6 hours.",
-];
+const quickPrompts = ["What are the most trending issues?", "Which PRs are ready to merge?", "Show me urgent review requests.", "Summarize activity in the last 6 hours."];
 
 function formatDate(value: string) {
   const date = new Date(value);
@@ -100,11 +95,7 @@ export function ActivityClient({ events }: { events: GitHubEventRecord[] }) {
     const lowerQuery = query.trim().toLowerCase();
 
     return events
-      .filter((event) =>
-        selectedRepos.length === 0
-          ? true
-          : selectedRepos.includes(`${event.org}/${event.repo}`)
-      )
+      .filter((event) => (selectedRepos.length === 0 ? true : selectedRepos.includes(`${event.org}/${event.repo}`)))
       .filter((event) => (selectedTypes.length === 0 ? true : selectedTypes.includes(event.type)))
       .filter((event) => timeMatchesFilter(event.createdAt, timeRange))
       .filter((event) => {
@@ -112,11 +103,7 @@ export function ActivityClient({ events }: { events: GitHubEventRecord[] }) {
           return true;
         }
         const summary = getEventSummary(event).toLowerCase();
-        return (
-          event.username.toLowerCase().includes(lowerQuery) ||
-          summary.includes(lowerQuery) ||
-          `${event.org}/${event.repo}`.toLowerCase().includes(lowerQuery)
-        );
+        return event.username.toLowerCase().includes(lowerQuery) || summary.includes(lowerQuery) || `${event.org}/${event.repo}`.toLowerCase().includes(lowerQuery);
       })
       .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
   }, [events, query, selectedRepos, selectedTypes, timeRange]);
@@ -157,24 +144,14 @@ export function ActivityClient({ events }: { events: GitHubEventRecord[] }) {
 
         <div className="mt-4 space-y-3">
           <p className="text-xs font-semibold uppercase tracking-[0.2em] text-muted-foreground">Search</p>
-          <Input
-            placeholder="Search repo, actor, title"
-            value={query}
-            onChange={(event) => setQuery(event.target.value)}
-          />
+          <Input placeholder="Search repo, actor, title" value={query} onChange={(event) => setQuery(event.target.value)} />
         </div>
 
         <div className="mt-6 space-y-3">
           <p className="text-xs font-semibold uppercase tracking-[0.2em] text-muted-foreground">Time window</p>
           <div className="flex flex-col gap-2">
             {["24h", "7d", "all"].map((range) => (
-              <Button
-                key={range}
-                type="button"
-                variant={timeRange === range ? "default" : "outline"}
-                size="sm"
-                onClick={() => setTimeRange(range)}
-              >
+              <Button key={range} type="button" variant={timeRange === range ? "default" : "outline"} size="sm" onClick={() => setTimeRange(range)}>
                 {range === "24h" ? "Last 24 hours" : range === "7d" ? "Last 7 days" : "All time"}
               </Button>
             ))}
@@ -207,9 +184,7 @@ export function ActivityClient({ events }: { events: GitHubEventRecord[] }) {
 
         <div className="mt-6 rounded-xl border border-border/60 bg-muted/40 p-3 text-xs text-muted-foreground">
           <p className="font-semibold text-foreground">Need more?</p>
-          <p className="mt-1">
-            Ask Pulse AI to highlight important PRs, risky issues, or review queues.
-          </p>
+          <p className="mt-1">Ask gitbot to highlight important PRs, risky issues, or review queues.</p>
         </div>
 
         <div className="mt-4">
@@ -223,13 +198,11 @@ export function ActivityClient({ events }: { events: GitHubEventRecord[] }) {
         <div className="flex flex-wrap items-center justify-between gap-3">
           <div>
             <h2 className="text-xl font-semibold">Activity feed</h2>
-            <p className="text-sm text-muted-foreground">
-              {filteredEvents.length} events match your current filters.
-            </p>
+            <p className="text-sm text-muted-foreground">{filteredEvents.length} events match your current filters.</p>
           </div>
           <Button variant="outline" onClick={() => setIsChatOpen(true)}>
             <MessageSquare className="mr-2 h-4 w-4" />
-            Open Pulse AI
+            Open Gitbot
           </Button>
         </div>
 
@@ -263,10 +236,7 @@ export function ActivityClient({ events }: { events: GitHubEventRecord[] }) {
                 const summary = getEventSummary(event);
 
                 return (
-                  <div
-                    key={event.id}
-                    className="grid grid-cols-[2fr_1fr_1fr_1fr_auto] gap-4 px-6 py-4 text-sm"
-                  >
+                  <div key={event.id} className="grid grid-cols-[2fr_1fr_1fr_1fr_auto] gap-4 px-6 py-4 text-sm">
                     <div className="space-y-1">
                       <div className="flex flex-wrap items-center gap-2">
                         <Badge variant="outline">{event.type}</Badge>
@@ -287,12 +257,7 @@ export function ActivityClient({ events }: { events: GitHubEventRecord[] }) {
                     <div className="text-sm text-muted-foreground">{formatDate(event.createdAt)}</div>
                     <div className="text-right">
                       {href ? (
-                        <Link
-                          className="text-sm font-medium text-foreground underline-offset-4 hover:underline"
-                          href={href}
-                          target="_blank"
-                          rel="noreferrer"
-                        >
+                        <Link className="text-sm font-medium text-foreground underline-offset-4 hover:underline" href={href} target="_blank" rel="noreferrer">
                           View
                         </Link>
                       ) : (
@@ -309,16 +274,11 @@ export function ActivityClient({ events }: { events: GitHubEventRecord[] }) {
 
       {isChatOpen && (
         <div className="fixed inset-0 z-40">
-          <button
-            type="button"
-            className="absolute inset-0 bg-black/40"
-            onClick={() => setIsChatOpen(false)}
-            aria-label="Close chat"
-          />
+          <button type="button" className="absolute inset-0 bg-black/40" onClick={() => setIsChatOpen(false)} aria-label="Close chat" />
           <aside className="absolute right-0 top-0 h-full w-full max-w-md border-l border-border/60 bg-background p-6 shadow-2xl">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-semibold">Pulse AI</p>
+                <p className="text-sm font-semibold">Gitbot AI</p>
                 <p className="text-xs text-muted-foreground">Chat over the current activity set</p>
               </div>
               <Button variant="ghost" size="icon" onClick={() => setIsChatOpen(false)}>
@@ -345,9 +305,7 @@ export function ActivityClient({ events }: { events: GitHubEventRecord[] }) {
                   <CardTitle className="text-sm">Chat</CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-3">
-                  <div className="rounded-xl border border-border/60 bg-muted/40 p-3 text-xs text-muted-foreground">
-                    Connect the RAG layer to enable summaries, insights, and action lists.
-                  </div>
+                  <div className="rounded-xl border border-border/60 bg-muted/40 p-3 text-xs text-muted-foreground">Connect the RAG layer to enable summaries, insights, and action lists.</div>
                   <Input placeholder="Ask about trends, blockers, or priorities..." />
                   <Button className="w-full">Send</Button>
                 </CardContent>

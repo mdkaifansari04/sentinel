@@ -1,8 +1,30 @@
-
-
-export const repoList= [
-    {
-        owner: "open-metadata",
-        repo: "openmetadata"
-    }
-]
+export const repoList = [
+  { owner: "OWASP-BLT", repo: "BLT" },
+  { owner: "OWASP-BLT", repo: "BLT-Flutter" },
+  { owner: "OWASP-BLT", repo: "BLT-Extension" },
+  { owner: "OWASP-BLT", repo: "BLT-Action" },
+  { owner: "OWASP-BLT", repo: "BLT-Lettuce" },
+  { owner: "OWASP-BLT", repo: "BLT-Sammich" },
+  { owner: "OWASP-BLT", repo: "Github_Sportscaster" },
+  { owner: "OWASP-BLT", repo: "BLT-NetGuardian" },
+  { owner: "OWASP-BLT", repo: "BLT-NetGuardian-Client" },
+  { owner: "OWASP-BLT", repo: "OWASP-BLT-Lyte" },
+  { owner: "OWASP-BLT", repo: "OWASP-BLT-Website-Monitor" },
+  { owner: "OWASP-BLT", repo: "BLT-on-Cloudflare" },
+  { owner: "OWASP-BLT", repo: "BLT-API-on-Cloudflare" },
+  { owner: "OWASP-BLT", repo: "BLT-Bacon" },
+  { owner: "OWASP-BLT", repo: "BLT-Tomato" },
+  { owner: "OWASP-BLT", repo: "BLT-API" },
+  { owner: "OWASP-BLT", repo: "SelfErase" },
+  { owner: "OWASP-BLT", repo: "Fresh" },
+  { owner: "OWASP-BLT", repo: "Sizzle" },
+  { owner: "OWASP-BLT", repo: "Toasty" },
+  { owner: "OWASP-BLT", repo: "BLT-Hackathon" },
+  { owner: "OWASP-BLT", repo: "BLT-Hackathon-NPM" },
+  { owner: "OWASP-BLT", repo: "MY-GSOC-TOOL" },
+  { owner: "OWASP-BLT", repo: "OWASP-Wich" },
+  { owner: "OWASP-BLT", repo: "OWASP-Bumper" },
+  { owner: "OWASP-BLT", repo: "BLT-CVE" },
+  { owner: "OWASP-BLT", repo: "Panini" },
+  { owner: "OWASP-BLT", repo: "BLT-sandbox" },
+];

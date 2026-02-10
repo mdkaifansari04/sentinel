@@ -1,23 +1,13 @@
 {
-  "$schema": "https://json.schemastore.org/tsconfig",
   "compilerOptions": {
-    "declaration": true,
-    "outDir": "./dist",
-    "rootDir": "./src",
-    "declarationMap": true,
-    "esModuleInterop": true,
-    "incremental": false,
-    "isolatedModules": true,
-    "lib": ["es2022", "DOM", "DOM.Iterable"],
-    "module": "ESNext",
-    "moduleDetection": "force",
-    "moduleResolution": "Bundler",
-    "noUncheckedIndexedAccess": true,
-    "resolveJsonModule": true,
-    "skipLibCheck": true,
+    "target": "ESNext",
+    "module": "NodeNext",
+    "moduleResolution": "NodeNext",
     "strict": true,
-    "target": "ES2022"
+    "esModuleInterop": true,
+    "sourceMap": true,
+    "lib": ["ESNext"],
+    "outDir": "./dist"
   },
-  "include": ["./src/**/*"],
-  "exclude": ["./dist"]
+  "include": ["src/**/*"]
 }
