@@ -486,7 +486,7 @@ npm run dev`}</code>
               </Card>
             </Link>
 
-            <Link href="https://github.com/yourusername/gh-org-event-tracker/blob/main/CONTRIBUTING.md" target="_blank" rel="noopener noreferrer" className="group">
+            <Link href="https://github.com/mdkaifansari04/sentinel/blob/main/CONTRIBUTING.md" target="_blank" rel="noopener noreferrer" className="group">
               <Card className="border-border/60 transition-colors hover:border-foreground/20">
                 <CardContent className="flex items-center justify-between p-6">
                   <div className="flex items-center gap-3">
@@ -501,7 +501,7 @@ npm run dev`}</code>
               </Card>
             </Link>
 
-            <Link href="https://github.com/yourusername/gh-org-event-tracker/issues" target="_blank" rel="noopener noreferrer" className="group">
+            <Link href="https://github.com/mdkaifansari04/sentinel/issues" target="_blank" rel="noopener noreferrer" className="group">
               <Card className="border-border/60 transition-colors hover:border-foreground/20">
                 <CardContent className="flex items-center justify-between p-6">
                   <div className="flex items-center gap-3">
