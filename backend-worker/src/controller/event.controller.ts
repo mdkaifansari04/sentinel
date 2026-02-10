@@ -14,6 +14,10 @@ export const getEvents = async (req: Request, res: Response, next: NextFunction)
         repo: repo,
         org: org,
       },
+      take: 100, // top 100 new events
+      orderBy: {
+        createdAt: "asc",
+      },
     });
     res.status(200).json({
       success: true,

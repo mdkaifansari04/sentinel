@@ -6,7 +6,6 @@ import { Button } from "@/components/ui/button";
 import Image from "next/image";
 import { TextEffect } from "@/components/motion-primitives/text-effect";
 import { AnimatedGroup } from "@/components/motion-primitives/animated-group";
-// import { HeroHeader } from "@/components/header";
 
 const transitionVariants = {
   item: {
@@ -68,7 +67,7 @@ export default function HeroSection() {
               className="mask-b-from-35% mask-b-to-90% absolute inset-0 top-56 -z-20 lg:top-32"
             >
               <div className=""></div>
-              {/* <Image src="https://ik.imagekit.io/lrigu76hy/tailark/night-background.jpg?updatedAt=1745733451120" alt="background" className="hidden size-full dark:block" width="3276" height="4095" /> */}
+              {/* <Image src="/images/sentinel-activity.png" alt="background" className="hidden size-full dark:block" width="3276" height="4095" /> */}
             </AnimatedGroup>
 
             <div aria-hidden className="absolute inset-0 -z-10 size-full [background:radial-gradient(125%_125%_at_50%_100%,transparent_0%,var(--color-background)_75%)]" />
@@ -127,8 +126,7 @@ export default function HeroSection() {
             >
               <div className="mask-b-from-55% relative -mr-56 mt-8 overflow-hidden px-2 sm:mr-0 sm:mt-12 md:mt-20">
                 <div className="inset-shadow-2xs ring-background dark:inset-shadow-white/20 bg-background relative mx-auto max-w-6xl overflow-hidden rounded-2xl border p-4 shadow-lg shadow-zinc-950/15 ring-1">
-                  <Image className="bg-background aspect-15/8 relative hidden rounded-2xl dark:block" src="/mail2.png" alt="app screen" width="2700" height="1440" />
-                  <Image className="z-2 border-border/25 aspect-15/8 relative rounded-2xl border dark:hidden" src="/mail2-light.png" alt="app screen" width="2700" height="1440" />
+                  <Image className="bg-background bg-cover bg-center relative hidden rounded-2xl dark:block" src="/images/hero.png" alt="app screen" width="2700" height="1440" />{" "}
                 </div>
               </div>
             </AnimatedGroup>
