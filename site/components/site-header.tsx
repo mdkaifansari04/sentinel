@@ -8,6 +8,7 @@ import { cn } from "@/lib/utils";
 import Image from "next/image";
 
 const menuItems = [
+  { name: "Docs", href: "/docs" },
   { name: "How it works", href: "#how-it-works" },
   { name: "Why it exists", href: "#about" },
   { name: "Problems solved", href: "#problems" },

@@ -18,13 +18,7 @@ Sentinel tracks activity across open source repositories and turns it into a cle
 
 ## Architecture
 
-Add your diagram image here when ready.
-
-Example:
-
-```
-![Architecture](docs/architecture.png)
-```
+![Architecture](docs/images/architecture.png)
 
 High-level flow:
 
@@ -146,7 +140,3 @@ The UI expects a JSON response shaped like:
 ## Contributing
 
 Read the contribution guide in `CONTRIBUTING.md`.
-
-## License
-
-Add your license details here.
