@@ -211,8 +211,12 @@ export function ActivityClient() {
     if (allRepos.length === 0) {
       return;
     }
+    const current = new Set(selectedRepos);
+    if (allRepos.length === selectedRepos.length && allRepos.every((repo) => current.has(repo))) {
+      return;
+    }
     setSelectedRepos(allRepos);
-  }, [selectAllRepos, allRepos]);
+  }, [selectAllRepos, allRepos, selectedRepos]);
 
   const totalPages = Math.max(1, Math.ceil(filteredEvents.length / PAGE_SIZE));
   const pageIndex = Math.min(page, totalPages);
