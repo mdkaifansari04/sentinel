@@ -38,6 +38,7 @@ const EVENT_LABELS: Record<string, { label: string; priority: "high" | "medium" 
 };
 
 const PAGE_SIZE = 12;
+const BOT_USERS = ["dependabot[bot]", "github-actions[bot]", "copilot", "coderabbitai[bot]"];
 
 function formatDate(value: string) {
   const date = new Date(value);
@@ -108,6 +109,8 @@ export function ActivityClient() {
   const [isChatOpen, setIsChatOpen] = React.useState(false);
   const [expandedOrgs, setExpandedOrgs] = React.useState<Set<string>>(new Set());
   const [page, setPage] = React.useState(1);
+  const [hideBots, setHideBots] = React.useState(true);
+  const [selectAllRepos, setSelectAllRepos] = React.useState(false);
 
   const orgsQuery = useQuery({
     queryKey: ["orgs"],
@@ -120,7 +123,10 @@ export function ActivityClient() {
     queries: orgs.map((org) => ({
       queryKey: ["repos", org],
       queryFn: () => fetchRepos(org),
-      enabled: expandedOrgs.has(org) || selectedRepos.some((repo) => repo.startsWith(`${org}/`)),
+      enabled:
+        selectAllRepos ||
+        expandedOrgs.has(org) ||
+        selectedRepos.some((repo) => repo.startsWith(`${org}/`)),
     })),
   });
 
@@ -136,6 +142,17 @@ export function ActivityClient() {
     const [org, repo] = entry.split("/");
     return { org, repo };
   });
+
+  const allRepos = React.useMemo(() => {
+    const list: string[] = [];
+    orgs.forEach((org) => {
+      const repos = reposByOrg.get(org) ?? [];
+      repos.forEach((repo) => {
+        list.push(`${org}/${repo}`);
+      });
+    });
+    return list;
+  }, [orgs, reposByOrg]);
 
   const eventQueries = useQueries({
     queries: selectedRepoPairs.map((pair) => ({
@@ -171,6 +188,7 @@ export function ActivityClient() {
     return events
       .filter((event) => (selectedRepos.length === 0 ? true : selectedRepos.includes(`${event.org}/${event.repo}`)))
       .filter((event) => (selectedTypes.length === 0 ? true : selectedTypes.includes(event.type)))
+      .filter((event) => (hideBots ? !BOT_USERS.includes(event.username.toLowerCase()) : true))
       .filter((event) => timeMatchesFilter(event.createdAt, timeRange))
       .filter((event) => {
         if (!lowerQuery) {
@@ -180,11 +198,21 @@ export function ActivityClient() {
         return event.username.toLowerCase().includes(lowerQuery) || summary.includes(lowerQuery) || `${event.org}/${event.repo}`.toLowerCase().includes(lowerQuery);
       })
       .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
-  }, [events, query, selectedRepos, selectedTypes, timeRange]);
+  }, [events, query, selectedRepos, selectedTypes, timeRange, hideBots]);
 
   React.useEffect(() => {
     setPage(1);
-  }, [query, selectedRepos, selectedTypes, timeRange]);
+  }, [query, selectedRepos, selectedTypes, timeRange, hideBots]);
+
+  React.useEffect(() => {
+    if (!selectAllRepos) {
+      return;
+    }
+    if (allRepos.length === 0) {
+      return;
+    }
+    setSelectedRepos(allRepos);
+  }, [selectAllRepos, allRepos]);
 
   const totalPages = Math.max(1, Math.ceil(filteredEvents.length / PAGE_SIZE));
   const pageIndex = Math.min(page, totalPages);
@@ -215,6 +243,8 @@ export function ActivityClient() {
     setSelectedTypes([]);
     setQuery("");
     setTimeRange("all");
+    setHideBots(true);
+    setSelectAllRepos(false);
   }
 
   function toggleOrg(org: string) {
@@ -256,6 +286,19 @@ export function ActivityClient() {
         <div className="mt-6 space-y-3">
           <p className="text-xs font-semibold uppercase tracking-[0.2em] text-muted-foreground">Organizations</p>
           <div className="space-y-2 text-sm">
+            <label className="flex items-center gap-2 text-sm">
+              <Checkbox
+                checked={selectAllRepos}
+                onCheckedChange={(value) => {
+                  const next = Boolean(value);
+                  setSelectAllRepos(next);
+                  if (!next) {
+                    setSelectedRepos([]);
+                  }
+                }}
+              />
+              <span>All repositories</span>
+            </label>
             {orgsQuery.isLoading ? (
               <p className="text-xs text-muted-foreground">Loading organizations...</p>
             ) : orgs.length === 0 ? (
@@ -311,6 +354,14 @@ export function ActivityClient() {
               );
             })}
           </div>
+        </div>
+
+        <div className="mt-6 space-y-3">
+          <p className="text-xs font-semibold uppercase tracking-[0.2em] text-muted-foreground">Actors</p>
+          <label className="flex items-center gap-2 text-sm">
+            <Checkbox checked={hideBots} onCheckedChange={(value) => setHideBots(Boolean(value))} />
+            <span>Hide bot accounts</span>
+          </label>
         </div>
 
         <div className="mt-6 rounded-xl border border-border/60 bg-muted/40 p-3 text-xs text-muted-foreground">
