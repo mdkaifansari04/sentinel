@@ -5,6 +5,7 @@ import express from "express";
 import { Worker } from "worker_threads";
 import { globalError } from "./libs/globalError.js";
 import eventRoute from "./router/event.route.js";
+import orgRoute from "./router/org.route.js";
 import cors from "cors";
 import { initWorkerThread } from "./worker/init.js";
 
@@ -19,6 +20,7 @@ app.use(
 );
 app.get("/", (req, res) => res.status(200).json({ message: "Welcome to the Sentinel API" }));
 app.use("/api/events", eventRoute);
+app.use("/api/orgs", orgRoute);
 
 app.use(globalError);
 initWorkerThread();

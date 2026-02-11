@@ -2,7 +2,8 @@
 
 import * as React from "react";
 import Link from "next/link";
-import { Filter, MessageSquare, X } from "lucide-react";
+import { ChevronDown, ChevronRight, Filter, MessageSquare, X } from "lucide-react";
+import { useQuery, useQueries } from "@tanstack/react-query";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -10,6 +11,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { fetchEventsForRepo, fetchOrgs, fetchRepos } from "@/lib/api";
 import type { GitHubEventRecord } from "@/lib/types";
 
 const dateFormatter = new Intl.DateTimeFormat("en-US", {
@@ -19,12 +21,33 @@ const dateFormatter = new Intl.DateTimeFormat("en-US", {
 
 const quickPrompts = ["What are the most trending issues?", "Which PRs are ready to merge?", "Show me urgent review requests.", "Summarize activity in the last 6 hours."];
 
+const EVENT_TYPES = ["CreateEvent", "DeleteEvent", "ForkEvent", "IssueCommentEvent", "IssuesEvent", "PullRequestEvent", "PullRequestReviewCommentEvent", "PullRequestReviewEvent", "PushEvent", "WatchEvent"];
+
+const EVENT_LABELS: Record<string, { label: string; priority: "high" | "medium" | "low" }> = {
+  PullRequestEvent: { label: "Pull request created", priority: "high" },
+  IssuesEvent: { label: "Issue created", priority: "high" },
+  PullRequestReviewEvent: { label: "PR review", priority: "high" },
+  PullRequestReviewCommentEvent: { label: "PR review comment", priority: "high" },
+  IssueCommentEvent: { label: "Issue comment", priority: "medium" },
+  PushEvent: { label: "Push", priority: "medium" },
+  CreateEvent: { label: "Created", priority: "medium" },
+  DeleteEvent: { label: "Deleted", priority: "low" },
+  ForkEvent: { label: "Forked", priority: "low" },
+  WatchEvent: { label: "Starred", priority: "low" },
+};
+
+const PAGE_SIZE = 12;
+
 function formatDate(value: string) {
   const date = new Date(value);
   if (Number.isNaN(date.getTime())) {
     return value;
   }
   return dateFormatter.format(date);
+}
+
+function getEventMeta(type: string) {
+  return EVENT_LABELS[type] ?? { label: type, priority: "low" as const };
 }
 
 function getEventHref(event: GitHubEventRecord): string | null {
@@ -54,7 +77,7 @@ function getEventSummary(event: GitHubEventRecord) {
   if (data?.ref) {
     return data.ref;
   }
-  return event.type;
+  return getEventMeta(event.type).label;
 }
 
 function timeMatchesFilter(createdAt: string, range: string) {
@@ -76,19 +99,69 @@ function timeMatchesFilter(createdAt: string, range: string) {
   return true;
 }
 
-export function ActivityClient({ events }: { events: GitHubEventRecord[] }) {
+export function ActivityClient() {
   const [query, setQuery] = React.useState("");
   const [selectedRepos, setSelectedRepos] = React.useState<string[]>([]);
   const [selectedTypes, setSelectedTypes] = React.useState<string[]>([]);
   const [timeRange, setTimeRange] = React.useState("24h");
   const [isChatOpen, setIsChatOpen] = React.useState(false);
+  const [expandedOrgs, setExpandedOrgs] = React.useState<Set<string>>(new Set());
+  const [page, setPage] = React.useState(1);
 
-  const repos = React.useMemo(() => {
-    return Array.from(new Set(events.map((event) => `${event.org}/${event.repo}`))).sort();
-  }, [events]);
+  const orgsQuery = useQuery({
+    queryKey: ["orgs"],
+    queryFn: fetchOrgs,
+  });
 
-  const types = React.useMemo(() => {
-    return Array.from(new Set(events.map((event) => event.type))).sort();
+  const orgs = orgsQuery.data ?? [];
+
+  const repoQueries = useQueries({
+    queries: orgs.map((org) => ({
+      queryKey: ["repos", org],
+      queryFn: () => fetchRepos(org),
+      enabled: expandedOrgs.has(org) || selectedRepos.some((repo) => repo.startsWith(`${org}/`)),
+    })),
+  });
+
+  const reposByOrg = React.useMemo(() => {
+    const map = new Map<string, string[]>();
+    orgs.forEach((org, index) => {
+      map.set(org, repoQueries[index]?.data ?? []);
+    });
+    return map;
+  }, [orgs, repoQueries]);
+
+  const selectedRepoPairs = selectedRepos.map((entry) => {
+    const [org, repo] = entry.split("/");
+    return { org, repo };
+  });
+
+  const eventQueries = useQueries({
+    queries: selectedRepoPairs.map((pair) => ({
+      queryKey: ["events", pair.org, pair.repo],
+      queryFn: () => fetchEventsForRepo(pair.org, pair.repo),
+      enabled: selectedRepoPairs.length > 0,
+      staleTime: 30_000,
+    })),
+  });
+
+  const isEventsLoading = eventQueries.some((queryResult) => queryResult.isLoading);
+  const events = React.useMemo(() => {
+    if (selectedRepoPairs.length === 0) {
+      return [] as GitHubEventRecord[];
+    }
+    const merged = new Map<string, GitHubEventRecord>();
+    eventQueries.forEach((queryResult) => {
+      queryResult.data?.forEach((event) => {
+        merged.set(event.id, event);
+      });
+    });
+    return Array.from(merged.values());
+  }, [eventQueries, selectedRepoPairs.length]);
+
+  const availableTypes = React.useMemo(() => {
+    const fromEvents = events.map((event) => event.type);
+    return Array.from(new Set([...EVENT_TYPES, ...fromEvents]));
   }, [events]);
 
   const filteredEvents = React.useMemo(() => {
@@ -108,9 +181,18 @@ export function ActivityClient({ events }: { events: GitHubEventRecord[] }) {
       .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
   }, [events, query, selectedRepos, selectedTypes, timeRange]);
 
+  React.useEffect(() => {
+    setPage(1);
+  }, [query, selectedRepos, selectedTypes, timeRange]);
+
+  const totalPages = Math.max(1, Math.ceil(filteredEvents.length / PAGE_SIZE));
+  const pageIndex = Math.min(page, totalPages);
+  const pageStart = (pageIndex - 1) * PAGE_SIZE;
+  const pageEvents = filteredEvents.slice(pageStart, pageStart + PAGE_SIZE);
+
   const activeFilters = [
     ...selectedRepos.map((repo) => ({ label: repo, onClear: () => toggleRepo(repo) })),
-    ...selectedTypes.map((type) => ({ label: type, onClear: () => toggleType(type) })),
+    ...selectedTypes.map((type) => ({ label: getEventMeta(type).label, onClear: () => toggleType(type) })),
     timeRange !== "all"
       ? {
           label: timeRange === "24h" ? "Last 24 hours" : "Last 7 days",
@@ -134,8 +216,20 @@ export function ActivityClient({ events }: { events: GitHubEventRecord[] }) {
     setTimeRange("all");
   }
 
+  function toggleOrg(org: string) {
+    setExpandedOrgs((prev) => {
+      const next = new Set(prev);
+      if (next.has(org)) {
+        next.delete(org);
+      } else {
+        next.add(org);
+      }
+      return next;
+    });
+  }
+
   return (
-    <div className="relative mt-10 grid gap-6 lg:grid-cols-[260px_1fr]">
+    <div className="relative mt-10 grid gap-6 lg:grid-cols-[280px_1fr]">
       <aside className="h-fit rounded-2xl border border-border/60 bg-card/60 p-4">
         <div className="flex items-center justify-between">
           <p className="text-sm font-semibold">Filters</p>
@@ -159,32 +253,68 @@ export function ActivityClient({ events }: { events: GitHubEventRecord[] }) {
         </div>
 
         <div className="mt-6 space-y-3">
-          <p className="text-xs font-semibold uppercase tracking-[0.2em] text-muted-foreground">Repositories</p>
-          <div className="max-h-40 space-y-2 overflow-auto pr-1 text-sm">
-            {repos.map((repo) => (
-              <label key={repo} className="flex cursor-pointer items-center gap-2">
-                <Checkbox checked={selectedRepos.includes(repo)} onCheckedChange={() => toggleRepo(repo)} />
-                <span>{repo}</span>
-              </label>
-            ))}
+          <p className="text-xs font-semibold uppercase tracking-[0.2em] text-muted-foreground">Organizations</p>
+          <div className="space-y-2 text-sm">
+            {orgsQuery.isLoading ? (
+              <p className="text-xs text-muted-foreground">Loading organizations...</p>
+            ) : orgs.length === 0 ? (
+              <p className="text-xs text-muted-foreground">No organizations available.</p>
+            ) : (
+              orgs.map((org, index) => {
+                const isExpanded = expandedOrgs.has(org);
+                const repos = reposByOrg.get(org) ?? [];
+                const repoQuery = repoQueries[index];
+
+                return (
+                  <div key={org} className="rounded-lg border border-border/60 bg-background/40 p-2">
+                    <button type="button" className="flex w-full items-center justify-between text-sm font-medium" onClick={() => toggleOrg(org)}>
+                      <span>{org}</span>
+                      {isExpanded ? <ChevronDown className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}
+                    </button>
+                    {isExpanded && (
+                      <div className="mt-2 space-y-2 pl-2">
+                        {repoQuery?.isLoading ? (
+                          <p className="text-xs text-muted-foreground">Loading repos...</p>
+                        ) : repos.length === 0 ? (
+                          <p className="text-xs text-muted-foreground">No repos found.</p>
+                        ) : (
+                          repos.map((repo) => {
+                            const key = `${org}/${repo}`;
+                            return (
+                              <label key={key} className="flex cursor-pointer items-center gap-2 text-sm">
+                                <Checkbox checked={selectedRepos.includes(key)} onCheckedChange={() => toggleRepo(key)} />
+                                <span>{repo}</span>
+                              </label>
+                            );
+                          })
+                        )}
+                      </div>
+                    )}
+                  </div>
+                );
+              })
+            )}
           </div>
         </div>
 
         <div className="mt-6 space-y-3">
           <p className="text-xs font-semibold uppercase tracking-[0.2em] text-muted-foreground">Event types</p>
-          <div className="max-h-40 space-y-2 overflow-auto pr-1 text-sm">
-            {types.map((type) => (
-              <label key={type} className="flex cursor-pointer items-center gap-2">
-                <Checkbox checked={selectedTypes.includes(type)} onCheckedChange={() => toggleType(type)} />
-                <span>{type}</span>
-              </label>
-            ))}
+          <div className="max-h-44 space-y-2 overflow-auto pr-1 text-sm">
+            {availableTypes.map((type) => {
+              const meta = getEventMeta(type);
+              return (
+                <label key={type} className="flex cursor-pointer items-center gap-2">
+                  <Checkbox checked={selectedTypes.includes(type)} onCheckedChange={() => toggleType(type)} />
+                  <span>{meta.label}</span>
+                </label>
+              );
+            })}
           </div>
         </div>
 
         <div className="mt-6 rounded-xl border border-border/60 bg-muted/40 p-3 text-xs text-muted-foreground">
           <p className="font-semibold text-foreground">Need more?</p>
-          <p className="mt-1">Ask gitbot to highlight important PRs, risky issues, or review queues.</p>
+          <p className="mt-1">Ask Pulse AI to highlight important PRs, risky issues, or review queues.</p>
         </div>
 
         <div className="mt-4">
@@ -202,7 +332,7 @@ export function ActivityClient({ events }: { events: GitHubEventRecord[] }) {
           </div>
           <Button variant="outline" onClick={() => setIsChatOpen(true)}>
             <MessageSquare className="mr-2 h-4 w-4" />
-            Open Gitbot
+            Open Pulse AI
           </Button>
         </div>
 
@@ -228,21 +358,26 @@ export function ActivityClient({ events }: { events: GitHubEventRecord[] }) {
             <span></span>
           </div>
           <div className="divide-y divide-border/60">
-            {filteredEvents.length === 0 ? (
+            {selectedRepos.length === 0 ? (
+              <div className="px-6 py-8 text-sm text-muted-foreground">Select one or more repositories to load activity.</div>
+            ) : isEventsLoading ? (
+              <div className="px-6 py-8 text-sm text-muted-foreground">Loading events...</div>
+            ) : pageEvents.length === 0 ? (
               <div className="px-6 py-8 text-sm text-muted-foreground">No events match these filters.</div>
             ) : (
-              filteredEvents.map((event) => {
+              pageEvents.map((event) => {
                 const href = getEventHref(event);
                 const summary = getEventSummary(event);
+                const meta = getEventMeta(event.type);
 
                 return (
                   <div key={event.id} className="grid grid-cols-[2fr_1fr_1fr_1fr_auto] gap-4 px-6 py-4 text-sm">
                     <div className="space-y-1">
                       <div className="flex flex-wrap items-center gap-2">
-                        <Badge variant="outline">{event.type}</Badge>
+                        <Badge variant={meta.priority}>{meta.label}</Badge>
                         <span className="font-semibold text-foreground">{summary}</span>
                       </div>
-                      <p className="text-xs text-muted-foreground">{event.data?.type ?? event.type}</p>
+                      <p className="text-xs text-muted-foreground">{event.type}</p>
                     </div>
                     <div className="text-sm text-muted-foreground">
                       {event.org}/{event.repo}
@@ -270,6 +405,22 @@ export function ActivityClient({ events }: { events: GitHubEventRecord[] }) {
             )}
           </div>
         </div>
+
+        {filteredEvents.length > 0 && (
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <p className="text-sm text-muted-foreground">
+              Page {pageIndex} of {totalPages}
+            </p>
+            <div className="flex items-center gap-2">
+              <Button variant="outline" size="sm" onClick={() => setPage((prev) => Math.max(1, prev - 1))} disabled={pageIndex === 1}>
+                Previous
+              </Button>
+              <Button variant="outline" size="sm" onClick={() => setPage((prev) => Math.min(totalPages, prev + 1))} disabled={pageIndex === totalPages}>
+                Next
+              </Button>
+            </div>
+          </div>
+        )}
       </section>
 
       {isChatOpen && (
@@ -278,7 +429,7 @@ export function ActivityClient({ events }: { events: GitHubEventRecord[] }) {
           <aside className="absolute right-0 top-0 h-full w-full max-w-md border-l border-border/60 bg-background p-6 shadow-2xl">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-semibold">Gitbot AI</p>
+                <p className="text-sm font-semibold">Pulse AI</p>
                 <p className="text-xs text-muted-foreground">Chat over the current activity set</p>
               </div>
               <Button variant="ghost" size="icon" onClick={() => setIsChatOpen(false)}>
@@ -286,14 +437,28 @@ export function ActivityClient({ events }: { events: GitHubEventRecord[] }) {
               </Button>
             </div>
 
-            <div className="mt-6 space-y-4">
+            <div className="relative mt-6 overflow-hidden rounded-2xl border border-border/60 bg-card/60">
+              <div className="absolute inset-0 bg-background/60 backdrop-blur-sm" />
+              <div className="relative z-10 p-6 text-center">
+                <Badge variant="outline" className="mx-auto mb-3">
+                  Coming soon
+                </Badge>
+                <p className="text-sm font-semibold">Pulse AI is on the way</p>
+                <p className="mt-2 text-xs text-muted-foreground">We are building a focused assistant for open-source activity insights.</p>
+              </div>
+              <div className="absolute inset-0 opacity-40" aria-hidden>
+                <div className="h-full w-full bg-[radial-gradient(circle_at_top,rgba(255,255,255,0.08),transparent_55%)]" />
+              </div>
+            </div>
+
+            <div className="mt-6 space-y-4 opacity-60">
               <Card className="border-border/60 bg-card/60">
                 <CardHeader>
                   <CardTitle className="text-sm">Quick prompts</CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-2">
                   {quickPrompts.map((prompt) => (
-                    <Button key={prompt} variant="outline" className="w-full justify-start" size="sm">
+                    <Button key={prompt} variant="outline" className="w-full justify-start" size="sm" disabled>
                       {prompt}
                     </Button>
                   ))}
@@ -306,8 +471,10 @@ export function ActivityClient({ events }: { events: GitHubEventRecord[] }) {
                 </CardHeader>
                 <CardContent className="space-y-3">
                   <div className="rounded-xl border border-border/60 bg-muted/40 p-3 text-xs text-muted-foreground">Connect the RAG layer to enable summaries, insights, and action lists.</div>
-                  <Input placeholder="Ask about trends, blockers, or priorities..." />
-                  <Button className="w-full">Send</Button>
+                  <Input placeholder="Ask about trends, blockers, or priorities..." disabled />
+                  <Button className="w-full" disabled>
+                    Send
+                  </Button>
                 </CardContent>
               </Card>
             </div>

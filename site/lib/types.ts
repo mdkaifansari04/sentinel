@@ -4,6 +4,16 @@ export type EventApiResponse = {
   data: GitHubEventRecord[];
 };
 
+export type OrgApiResponse = {
+  success: boolean;
+  data: { org: string }[];
+};
+
+export type RepoApiResponse = {
+  success: boolean;
+  data: { repo: string }[];
+};
+
 export type GitHubEventRecord = {
   id: string;
   org: string;
